@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { buildingsList } from './resources/buildings';
 
 @Component({
   selector: 'app-root',
@@ -7,7 +8,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
 
-  winPrice = 0;
+  winPrice = 800;
 
   teams = [{
     name: "1",
@@ -17,49 +18,29 @@ export class AppComponent {
       wood: 0,
       stone: 0,
       brick: 0,
-    }
+    },
+    points: 0,
   }]
 
-  buildings = [{
-    name: "Pila",
-    income: { wood: 1 },
-    price: { wood: 2, stone: 1, brick: 1, money: 0 }
-  },
-  {
-    name: "Kamenolom",
-    income: { stone: 1 },
-    price: { wood: 1, stone: 1, brick: 3, money: 0 }
-  },
-  {
-    name: "Cihelna",
-    income: { brick: 1 },
-    price: { wood: 5, stone: 3, brick: 1, money: 0 }
-  },
-  {
-    name: "Tržiště",
-    hasDiscount: true,
-    income: {},
-    price: { wood: 2, stone: 2, brick: 2, money: 0 }
-  },
-]
+  buildings = buildingsList;
 
   marketResources = [{
     name: "Dřevo",
     propertyName: "wood",
-    price: 100,
-    discountPrice: 50,
+    price: 50,
+    discountPrice: 40,
   },
   {
     name: "Kámen",
     propertyName: "stone",
-    price: 200,
-    discountPrice: 100,
+    price: 100,
+    discountPrice: 90,
   },
   {
     name: "Cihla",
     propertyName: "brick",
-    price: 300,
-    discountPrice: 150,
+    price: 150,
+    discountPrice: 140,
   }];
 
   log: string[] = [];
@@ -76,15 +57,17 @@ export class AppComponent {
     const startBrick = team.resources.brick;
 
     team.buildings.forEach((building: any) => {
-      team.resources.money += building.income.money ?? 0;
-      team.resources.brick += building.income.brick ?? 0;
-      team.resources.wood += building.income.wood ?? 0;
-      team.resources.stone += building.income.stone ?? 0;
+      const income = building.incomeFn != null ? building.incomeFn(team) : building.income;
+      team.resources.money += income?.money ?? 0;
+      team.resources.brick += income?.brick ?? 0;
+      team.resources.wood += income?.wood ?? 0;
+      team.resources.stone += income?.stone ?? 0;
     });
-    this.log.push("Výnos peníze: " + (team.resources.money - startMoney));
-    this.log.push("Výnos dřevo: " + (team.resources.wood - startWood));
-    this.log.push("Výnos kámen: " + (team.resources.stone - startStone));
-    this.log.push("Výnos cihly: " + (team.resources.brick - startBrick));
+    this.log.push("Výnosy:");
+    this.log.push("- peníze: " + (team.resources.money - startMoney));
+    this.log.push("- dřevo: " + (team.resources.wood - startWood));
+    this.log.push("- kámen: " + (team.resources.stone - startStone));
+    this.log.push("- cihly: " + (team.resources.brick - startBrick));
   }
 
   buy(team: any, building: any) {
@@ -100,8 +83,16 @@ export class AppComponent {
         team.resources.brick -= building.price.brick;
         team.buildings.push(building);
         this.buildings = this.buildings.filter(x => x.name !== building.name);
+        team.points += this.countResourcesToMoney(building);
         this.log.push("Nákup: " + building.name);
       }
+  }
+
+  public countResourcesToMoney(building: any) {
+    return building.price.money
+    + building.price.wood * this.marketResources[0].price 
+    + building.price.stone * this.marketResources[1].price 
+    + building.price.brick * this.marketResources[2].price;
   }
 
   buyResource(team: any, resource: any) {

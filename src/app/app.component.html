@@ -1,3 +1,4 @@
+Simulátor se restartuje přenačtením stránky. Veškeré informace se po zavření/přenačtení resetují.
 <div *ngFor="let team of teams">
   <fieldset>
     <legend>Tým {{team.name}}</legend>
@@ -10,6 +11,7 @@
           <th>Drevo</th>
           <th>Kamen</th>
           <th>Cihla</th>
+          <th>Body (součet cen budov v dolarech)</th>
         </tr>
       </thead>
       <tbody>
@@ -18,6 +20,7 @@
           <td>{{team.resources.wood}}</td>
           <td>{{team.resources.stone}}</td>
           <td>{{team.resources.brick}}</td>
+          <td>{{team.points}}</td>
         </tr>
       </tbody>
     </table>
@@ -37,22 +40,23 @@
       <tbody>
         <tr *ngFor="let building of team.buildings">
           <td>{{building.name}}</td>
-          <td>{{building.income.money}}</td>
-          <td>{{building.income.wood}}</td>
-          <td>{{building.income.stone}}</td>
-          <td>{{building.income.brick}}</td>
+          <td>{{building.income?.money}}</td>
+          <td>{{building.income?.wood}}</td>
+          <td>{{building.income?.stone}}</td>
+          <td>{{building.income?.brick}}</td>
         </tr>
       </tbody>
     </table>
-    <button (click)="addIncome(team)">Přidat přínosy</button>
+    <button (click)="addIncome(team)">Přidat přínosy</button> Přidá zdroje z vlastněných budov
   </fieldset>
   <fieldset>
     <legend>Přidat výhru</legend>
     <input type="number" [(ngModel)]="winPrice">
-    <button (click)="addPrice(team)">Přidat</button>
+    <button (click)="addPrice(team)">Přidat</button> Přidá výhru za ceteh. Předpokládané rozmezí 100 - 800 (velká etapa 200/400/600/800, malá 100/200/300/400).
   </fieldset>
   <fieldset>
     <legend>Trh</legend>
+    Simulace nákupu surovin. Nákup kliknutím na +. Cenu je možné měnit.
     <table>
       <thead>
         <tr>
@@ -66,14 +70,15 @@
         <tr *ngFor="let res of marketResources">
           <td><a (click)="buyResource(team, res)">+</a></td>
           <td>{{res.name}}</td>
-          <td>{{res.price}}</td>
-          <td>{{res.discountPrice}}</td>
+          <td><input type="number" [(ngModel)]="res.price"></td>
+          <td><input type="number" [(ngModel)]="res.discountPrice"></td>
         </tr>
       </tbody>
     </table>
   </fieldset>
   <fieldset>
     <legend>Koupit budovu</legend>
+    Umožnuje nakupovat budovy. Nákup se provede, jen pokud má je dostatek surovin (v tabulce Zdroje). Ceny je možné měnit.
     <table>
       <thead>
         <tr>
@@ -83,23 +88,35 @@
           <th>Cena dřeva</th>
           <th>Cena kamenů</th>
           <th>Cena cihel</th>
+          <th>Převod ceny na dolary/body</th>
+          <th>Přínos dolarů</th>
+          <th>Přínos dřeva</th>
+          <th>Přínos kamenů</th>
+          <th>Přínos cihel</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let building of buildings">
           <td><a (click)="buy(team, building)">koupit</a></td>
           <td>{{building.name}}</td>
-          <td>{{building.price.money}}</td>
-          <td>{{building.price.wood}}</td>
-          <td>{{building.price.stone}}</td>
-          <td>{{building.price.brick}}</td>
+          <td><input type="number" [(ngModel)]="building.price.money"></td>
+          <td><input type="number" [(ngModel)]="building.price.wood"></td>
+          <td><input type="number" [(ngModel)]="building.price.stone"></td>
+          <td><input type="number" [(ngModel)]="building.price.brick"></td>
+          <td>{{countResourcesToMoney(building)}}</td>
+          <td><input type="number" [(ngModel)]="building.income.money"></td>
+          <td><input type="number" [(ngModel)]="building.income.wood"></td>
+          <td><input type="number" [(ngModel)]="building.income.stone"></td>
+          <td><input type="number" [(ngModel)]="building.income.brick"></td>
         </tr>
       </tbody>
     </table>
+    <p>* Šerif +50 za každou budovu co vydělává peníze</p>
+    <p>* Herna náhodně +50$/+100$/+150$/+1d/+1k/+1c (simulace kostky)</p>
   </fieldset>
 
   <fieldset>
-    <legend>Záznam</legend>
+    <legend>Záznam akcí</legend>
     <p *ngFor="let item of log">{{item}}</p>
   </fieldset>
 </fieldset>
