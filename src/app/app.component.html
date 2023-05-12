@@ -8,8 +8,8 @@
         <tr>
           <th>Penize</th>
           <th>Drevo</th>
-          <th>Cihla</th>
           <th>Kamen</th>
+          <th>Cihla</th>
         </tr>
       </thead>
       <tbody>
@@ -59,7 +59,7 @@
           <th></th>
           <th>Surovina</th>
           <th>Cena</th>
-          <th>Cena po slevě</th>
+          <th>Cena s tržištěm</th>
         </tr>
       </thead>
       <tbody>
@@ -100,6 +100,11 @@
   
   <fieldset>
     <legend>Posunout den</legend>
+  </fieldset>
+
+  <fieldset>
+    <legend>Záznam</legend>
+    <p *ngFor="let item of log">{{item}}</p>
   </fieldset>
 </fieldset>
 </div>
