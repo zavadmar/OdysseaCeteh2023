@@ -1,9 +1,71 @@
-Simulátor se restartuje přenačtením stránky. Veškeré informace se po zavření/přenačtení resetují.
+<div>Simulátor se restartuje přenačtením stránky. Veškeré informace se po zavření/přenačtení resetují.</div>
+<div><button (click)="simulateTeams()">Simulovat tymy - prioritní nákup</button></div>
+<div><button (click)="simulateTeams(true)">Simulovat tymy - náhodný nákup</button></div>
+
+<h2>Přehled</h2>
+
+<div  *ngFor="let team of teams">
+  <legend>Tým {{team.name}}</legend>
+  <fieldset>
+    <legend>Zdroje</legend>
+    <button (click)="simulateRandom(team, prices)">Simulace náhodně</button>
+    <button (click)="simulateRandom(team, maxPrices)">Simulace maximum</button>
+    <button (click)="simulateRandom(team, minPrices)">Simulace minimum</button>
+  <table>
+    <thead>
+      <tr>
+        <th>Penize</th>
+        <th>Drevo</th>
+        <th>Kamen</th>
+        <th>Cihla</th>
+        <th>Body (součet cen budov v dolarech)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{team.resources.money}}</td>
+        <td>{{team.resources.wood}}</td>
+        <td>{{team.resources.stone}}</td>
+        <td>{{team.resources.brick}}</td>
+        <td>{{team.points}}</td>
+      </tr>
+    </tbody>
+  </table>
+</fieldset>
+<fieldset>
+  <legend>Statistiky</legend>
+  <table>
+    <thead>
+      <tr>
+        <th>Výhra celkem</th>
+        <th>Příjem peněz</th>
+        <th>Dřeva</th>
+        <th>Kamene</th>
+        <th>Cihel</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{team.stats.winPriceSum}}</td>
+        <td>{{team.stats.incomeSum.money}}</td>
+        <td>{{team.stats.incomeSum.wood}}</td>
+        <td>{{team.stats.incomeSum.stone}}</td>
+        <td>{{team.stats.incomeSum.brick}}</td>
+      </tr>
+    </tbody>
+  </table>
+</fieldset>
+</div>
+
+<h2>Podrobný simulator</h2>
 <div *ngFor="let team of teams">
   <fieldset>
     <legend>Tým {{team.name}}</legend>
     <fieldset>
       <legend>Zdroje</legend>
+      <button (click)="simulateRandom(team, prices)">Simulace náhodně</button>
+      <button (click)="simulateRandom(team, maxPrices)">Simulace maximum</button>
+      <button (click)="simulateRandom(team, minPrices)">Simulace minimum</button>
     <table>
       <thead>
         <tr>
@@ -21,6 +83,29 @@ Simulátor se restartuje přenačtením stránky. Veškeré informace se po zav�
           <td>{{team.resources.stone}}</td>
           <td>{{team.resources.brick}}</td>
           <td>{{team.points}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </fieldset>
+  <fieldset>
+    <legend>Statistiky</legend>
+    <table>
+      <thead>
+        <tr>
+          <th>Výhra celkem</th>
+          <th>Příjem peněz</th>
+          <th>Dřeva</th>
+          <th>Kamene</th>
+          <th>Cihel</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{team.stats.winPriceSum}}</td>
+          <td>{{team.stats.incomeSum.money}}</td>
+          <td>{{team.stats.incomeSum.wood}}</td>
+          <td>{{team.stats.incomeSum.stone}}</td>
+          <td>{{team.stats.incomeSum.brick}}</td>
         </tr>
       </tbody>
     </table>
@@ -52,7 +137,7 @@ Simulátor se restartuje přenačtením stránky. Veškeré informace se po zav�
   <fieldset>
     <legend>Přidat výhru</legend>
     <input type="number" [(ngModel)]="winPrice">
-    <button (click)="addPrice(team)">Přidat</button> Přidá výhru za ceteh. Předpokládané rozmezí 100 - 800 (velká etapa 200/400/600/800, malá 100/200/300/400).
+    <button (click)="addPrice(team, winPrice)">Přidat</button> Přidá výhru za ceteh. Předpokládané rozmezí 100 - 800 (velká etapa 200/400/600/800, malá 100/200/300/400).
   </fieldset>
   <fieldset>
     <legend>Trh</legend>
@@ -93,10 +178,13 @@ Simulátor se restartuje přenačtením stránky. Veškeré informace se po zav�
           <th>Přínos dřeva</th>
           <th>Přínos kamenů</th>
           <th>Přínos cihel</th>
+          <th>Poměr cena/výnos</th>
+          <th>Poměr cena/výnos s tržištěm</th>
+          <th>Priorita</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let building of buildings">
+        <tr *ngFor="let building of team.availableBuildings">
           <td><a (click)="buy(team, building)">koupit</a></td>
           <td>{{building.name}}</td>
           <td><input type="number" [(ngModel)]="building.price.money"></td>
@@ -108,16 +196,19 @@ Simulátor se restartuje přenačtením stránky. Veškeré informace se po zav�
           <td><input type="number" [(ngModel)]="building.income.wood"></td>
           <td><input type="number" [(ngModel)]="building.income.stone"></td>
           <td><input type="number" [(ngModel)]="building.income.brick"></td>
+          <td>{{countIncomeRate(team, building)}}</td>
+          <td>{{countIncomeDiscountRate(team, building)}}</td>
+          <td>{{building.priority}}</td>
         </tr>
       </tbody>
     </table>
     <p>* Šerif +50 za každou budovu co vydělává peníze</p>
     <p>* Herna náhodně +50$/+100$/+150$/+1d/+1k/+1c (simulace kostky)</p>
   </fieldset>
-
+  
   <fieldset>
     <legend>Záznam akcí</legend>
-    <p *ngFor="let item of log">{{item}}</p>
+    <p *ngFor="let item of team.log">{{item}}</p>
   </fieldset>
 </fieldset>
 </div>

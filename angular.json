@@ -107,5 +107,8 @@
       }
     }
   },
-  "defaultProject": "ceteh"
+  "defaultProject": "ceteh",
+  "cli": {
+    "analytics": false
+  }
 }
