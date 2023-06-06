@@ -212,6 +212,14 @@ export class AppComponent {
   prices = [
     [
       this.bigPrice,
+    ],
+    [
+      this.bigPrice,
+      this.smallPrice,
+    ],
+    [
+      this.bigPrice,
+      this.smallPrice,
       this.smallPrice,
     ],
     [
@@ -220,12 +228,6 @@ export class AppComponent {
     [
       this.bigPrice,
       this.smallPrice,
-    ],
-    [
-      this.bigPrice,
-    ],
-    [
-      this.bigPrice,
       this.smallPrice,
     ],
     [
@@ -233,6 +235,7 @@ export class AppComponent {
     ],
     [
       this.bigPrice,
+      this.smallPrice,
       this.smallPrice,
     ],
     [
